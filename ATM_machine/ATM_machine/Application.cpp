@@ -129,6 +129,8 @@ private:
     string ATMBankname;
     int ATMmoney; // 초기값을 천만원으로 설정
     bool Single;
+    int num_of_deposit_cash;
+    int num_of_deposit_check;
 
     string History;
     int DepoFee;  // 1000원
@@ -137,6 +139,12 @@ private:
     Bank* p_AccountNum;
     Bank* p_UserName;
 public:
+    int get_ATM_num_of_cash() {
+        return num_of_deposit_cash;
+    }
+    int get_ATM_num_of_check() {
+        return num_of_deposit_check;
+    }
     int get_ATMmoney() {                               // ATMmoney 반환 함수
         return ATMmoney;
     }
@@ -171,11 +179,13 @@ public:
         ATMBankname = pa_ATMBankname;
         ATMmoney = 10000;
         Single = pa_SinorMul;
+        num_of_deposit_cash = 25;
+        num_of_deposit_check = 10;
     }
     ~ATM() {}
 };
 
-ATM::ATM() : ATMnum(0), ATMBank("None"), ATMmoney(10000000), Single(true), History(nullptr), DepoFee(1000), WithdFee(1500), SendFee(500), p_AccountNum(nullptr), p_UserName(nullptr) {}// 모든 멤버를 디폴트 값으로 생성
+ATM::ATM() : ATMnum(0),ATMBank("None"), ATMmoney(10000000), Single(true), History(nullptr), DepoFee(1000), WithdFee(1500), SendFee(500), p_AccountNum(nullptr), p_UserName(nullptr), num_of_deposit_cash(25), num_of_deposit_check(10) {}// 모든 멤버를 디폴트 값으로 생성
 
 ATM::ATM(int pa_ATMnum, string pa_ATMBank, string pa_ATMBankname, bool pa_SinorMul, Bank* pa_p_AccountNum, Bank* pa_p_UserName) {
     ATMnum = pa_ATMnum;
@@ -304,6 +314,7 @@ int main() {
         }
         cout << endl;
         cout << "7: Admin mode " << endl;
+        cout << endl;
         
         try {
             cin >> ATM_cnt;
@@ -352,8 +363,8 @@ int main() {
                 cout << "│                      " << start->get_ATMBank() << endl;
                 cout << "├-----------------------------------------------------┤" << endl;
                 cout << "│ What do you want to do ? Please press number(ex. 1)" << endl;
-                cout << "│ 0. Stop using" << endl;
-                cout << "│ 1. Cash/Check Insert and Dispenser" << endl;
+                cout << "│ 0. Stop using (Go back ATM_list display)" << endl;
+                cout << "│ 1. Cancel" << endl;
                 cout << "│ 2. Card insert" << endl;
                 cout << "│ 3. Receipt Print" << endl;
                 cout << "│ 4. Deposit" << endl;
@@ -377,7 +388,7 @@ int main() {
                     }
                     if (press_button < 0 || press_button>6)
                         throw exception("Out of range!");
-                    if (card_index == -1 && press_button > 3)
+                    if (card_index == -1 && press_button > 2)
                         throw exception("No card input");
                 }
                 catch (exception& e) {
@@ -391,89 +402,148 @@ int main() {
                     cout << "Thank you for using ATM" << endl;
                     break;
                 }
+                else if (press_button == 1) {
+                    card_index= -1;
+                    cout << "Please get a card" << endl;
+                    continue;
+                }
                 else if (press_button == 2) {                              // 카드 재입력
                     try {
-                        if (card_index == -1)
+                        if (card_index == -1) {
                             cout << "Please insert your card(Enter your card number)" << endl;
-                        else
-                            cout << "Please insert your another card(Enter your card number)" << endl;
-                        cin >> card_num;
-                        if (cin.fail()) {
-                            cin.clear();
-                            cin.ignore(100, '\n');
-                            throw exception("Value error!");
-                        }
-                        if (card_num % 100 == 1) {                        // card valid 검사
-                            if (DaeguBank.find_card(card_num) == -1)
-                                throw exception("This card is not valid");
-                            cout << "Card is valid" << endl;
-                            card_index = DaeguBank.find_card(card_num);
-                            current_bank = &DaeguBank;
-                            current_bank_str = "DaeguBank";
-                        }
-                        else if (card_num % 100 == 11) {
-                            if (SamsungBank.find_card(card_num) == -1)
-                                throw exception("This card is not valid");
-                            cout << "Card is valid" << endl;
-                            card_index = SamsungBank.find_card(card_num);
-                            current_bank = &SamsungBank;
-                            current_bank_str = "SamsungBank";
-                        }
-                        else if (card_num % 100 == 21) {
-                            if (KakaoBank.find_card(card_num) == -1)
-                                throw exception("This card is not valid");
-                            cout << "Card is valid" << endl;
-                            card_index = KakaoBank.find_card(card_num);
-                            current_bank = &KakaoBank;
-                            current_bank_str = "KakaoBank";
-                        }
-                        else
-                            throw exception("This card is not valid");
-
-                        if (start->get_ATMSingle() == true) {        // 카드 valid 검사 직후 ATM 싱글/멀티 체크 -> 탈락 시 throw -> continue
-                            if (start->get_ATMBankname() != current_bank_str) {
-                                card_index = -1;
-                                throw exception("This card is not supported by this ATM machine");
+                            cin >> card_num;
+                            if (cin.fail()) {
+                                cin.clear();
+                                cin.ignore(100, '\n');
+                                throw exception("Value error!");
                             }
-                            else                                     // 지원하는 경우에도 문구 출력
-                                cout << "This card is useable on this ATM machine" << endl;
+                            if (card_num % 100 == 1) {                        // card valid 검사
+                                if (DaeguBank.find_card(card_num) == -1)
+                                    throw exception("This card is not valid");
+                                cout << "Card is valid" << endl;
+                                card_index = DaeguBank.find_card(card_num);
+                                current_bank = &DaeguBank;
+                                current_bank_str = "DaeguBank";
+                            }
+                            else if (card_num % 100 == 11) {
+                                if (SamsungBank.find_card(card_num) == -1)
+                                    throw exception("This card is not valid");
+                                cout << "Card is valid" << endl;
+                                card_index = SamsungBank.find_card(card_num);
+                                current_bank = &SamsungBank;
+                                current_bank_str = "SamsungBank";
+                            }
+                            else if (card_num % 100 == 21) {
+                                if (KakaoBank.find_card(card_num) == -1)
+                                    throw exception("This card is not valid");
+                                cout << "Card is valid" << endl;
+                                card_index = KakaoBank.find_card(card_num);
+                                current_bank = &KakaoBank;
+                                current_bank_str = "KakaoBank";
+                            }
+                            else
+                                throw exception("This card is not valid");
+
+                            if (start->get_ATMSingle() == true) {        // 카드 valid 검사 직후 ATM 싱글/멀티 체크 -> 탈락 시 throw -> continue
+                                if (start->get_ATMBankname() != current_bank_str) {
+                                    card_index = -1;
+                                    throw exception("This card is not supported by this ATM machine");
+                                }
+                                else                                     // 지원하는 경우에도 문구 출력
+                                    cout << "This card is useable on this ATM machine" << endl;
+                            }
+                            else
+                                cout << "This card is useable on this ATM machine" << endl; // 지원하는 경우에도 문구 출력
                         }
-                        else
-                            cout << "This card is useable on this ATM machine" << endl; // 지원하는 경우에도 문구 출력
+
+                        else {
+                            cout << "A card is already inserted." << endl;
+                            cout << "If you want to work with another card, press button '1'." << endl;
+                        }
+                        
                     }
                     catch (exception& e) {
                         cout << e.what() << endl;
                         continue;
                     }
                 }
+
+
                 else if (press_button == 3) {
                     cout << "ATM History:" << endl;
+                    cout << start->get_history() << endl;
+                    /*
                     if (card_num % 100 == 1)
                         cout << DaeguATM.get_history() << endl;
                     else if (card_num % 100 == 11)
                         cout << SamsungATM.get_history() << endl;
                     else if (card_num % 100 == 21)
                         cout << KakaoATM.get_history() << endl;
+                        */
                 }
                 else if (press_button == 4) {
                     //여기서 Deposit 수행
                     Account* Acc_deposit = current_bank->get_Account()[card_index];
-                    int deposit_money;
+
+                    int One_thousand_won=0;
+                    int Five_thousand_won=0;
+                    int Ten_tousand_won=0;
+                    int Fifty_thousand_won=0;
+                    int check=0;
+                    
+
+                    
+                    
                     string ATMBankname1 = start->get_ATMBankname();
                     int deposit_fee = start->Howmuchfee(ATMBankname1, current_bank_str, "Depos");
                     while (true) {
                         try {
-                            cout << "Enter the money you want to deposit" << endl;
-                            cin >> deposit_money;
-                            if (cin.fail()) {
+                            cout << "Enter the Enter the number of one_thousand won to deposit: ";
+                            cin >> One_thousand_won;
+                            if (cin.fail() || One_thousand_won <0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
                                 throw exception("Value error!");
                             }
-                            if (deposit_money < 0)
-                                throw exception("Out of range!");
-                            if (deposit_money < deposit_fee)
+                            cout << "Enter the Enter the number of five_thousand won to deposit: ";
+                            cin >> Five_thousand_won;
+                            if (cin.fail() || Five_thousand_won <0) {
+                                cin.clear();
+                                cin.ignore(100, '\n');
+                                throw exception("Value error!");
+                            }
+                            cout << "Enter the Enter the number of ten_thousand won to deposit: ";
+                            cin >> Ten_tousand_won;
+                            if (cin.fail() || Ten_tousand_won <0) {
+                                cin.clear();
+                                cin.ignore(100, '\n');
+                                throw exception("Value error!");
+                            }
+                            cout << "Enter the Enter the number of fifty_thousand won to deposit: ";
+                            cin >> Fifty_thousand_won;
+                            if (cin.fail() || Fifty_thousand_won <0) {
+                                cin.clear();
+                                cin.ignore(100, '\n');
+                                throw exception("Value error!");
+                            }
+                            cout << "Enter the Enter the number of check to deposit: " ;
+                            cin >> check;
+                            if (cin.fail() || check <0) {
+                                cin.clear();
+                                cin.ignore(100, '\n');
+                                throw exception("Value error!");
+                            }
+                            
+                            
+                            int deposit_money = 1000 * One_thousand_won + 5000 * Five_thousand_won + 10000 * Ten_tousand_won + 50000 * Fifty_thousand_won;
+                           
+                            if (deposit_money + 100000*check < deposit_fee)
                                 throw exception("Deposited money is smaller than the fee.");      // 입금 금액이 수수료보다 작을 시 다시 입금
+
+                            int atm_num_of_cash = One_thousand_won + Five_thousand_won + Ten_tousand_won + Fifty_thousand_won;
+                            if (atm_num_of_cash > start->get_ATM_num_of_cash() || check > start->get_ATM_num_of_check()) {
+                                throw exception("You have exceeded the amount of money(cash or check) you can deposit.");
+                            }
                             break;
                         }
                         catch (exception& e) {
@@ -482,14 +552,14 @@ int main() {
                         }
                     }
                     int i;
-                    for (i = 0; i < 5; i++) {
+                    for (i = 0; i < 3; i++) {
                         try {
                             cout << "Enter your password" << endl;
                             cin >> password;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                throw exception("Wrong Password");
                             }
                             if (password != Acc_deposit->getPassword())
                                 throw password;
@@ -497,6 +567,7 @@ int main() {
                         }
                         catch (exception& e) {
                             cout << e.what() << endl;
+                            cout << "Password error : " << i + 1 << "times" << endl;
                             continue;
                         }
                         catch (int t) {
@@ -504,13 +575,16 @@ int main() {
                         }
 
                     }
-                    if (i == 5) {
+                    if (i == 3) {
                         cout << "too many error" << endl;
                         continue;
                     }
                     // Howmuchfee(string pa_ATMBankname, string pa_current_bank_str, string pa_transaction)
+
+                   
+                    int deposit_money = 1000 * One_thousand_won + 5000 * Five_thousand_won + 10000 * Ten_tousand_won + 50000 * Fifty_thousand_won;
                     start->change_ATMmoney(deposit_money);
-                    Acc_deposit->change_Money(deposit_money - deposit_fee);
+                    Acc_deposit->change_Money(deposit_money - deposit_fee + 100000*check);
                     start->add_history(Acc_deposit->get_Username() + " deposit $" + to_string(deposit_money) + "\n");
 
                     cout << "Deposit fee is : " << deposit_fee << endl;
