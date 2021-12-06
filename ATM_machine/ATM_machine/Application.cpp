@@ -465,7 +465,21 @@ int main() {
                             }
                             else
                                 cout << "This card is useable on this ATM machine" << endl; // 지원하는 경우에도 문구 출력
-                        }
+
+                            Account* Acc_password = current_bank->get_Account()[card_index];
+                            int i;
+                            for (i = 0; i < 3; i++) {
+                                try {
+                                    cout << "Enter your password" << endl;
+                                    cin >> password;
+                                    if (cin.fail()) {
+                                        cin.clear();
+                                        cin.ignore(100, '\n');
+                                        throw exception("Wrong Password");
+                                    }
+                                    if (password != Acc_password->getPassword()) {
+                                        cout << "Wrong Password" << endl;
+                                        throw password;
 
                                     }
 
@@ -580,38 +594,27 @@ int main() {
                             break;
                         }
                         catch (exception& e) {
-                            cout << e.what() << endl;
-                            continue;
-                        }
-                    }
-                    int i;
-                    for (i = 0; i < 3; i++) {
-                        try {
-                            cout << "Enter your password" << endl;
-                            cin >> password;
-                            if (cin.fail()) {
-                                cin.clear();
-                                cin.ignore(100, '\n');
-                                throw exception("Wrong Password");
-                            }
-                            if (password != Acc_deposit->getPassword())
-                                throw password;
-                            break;
-                        }
-                        catch (exception& e) {
-                            cout << e.what() << endl;
-                            cout << "Password error : " << i + 1 << "times" << endl;
-                            continue;
-                        }
-                        catch (int t) {
-                            cout << "Password error : " << i + 1 << "times" << endl;
-                        }
+                            try {
+                                int next_button;
+                                cout << e.what() << endl;
+                                cout << "Are you sure you want to re-enter?" << endl;
+                                cout << "1. Yes    2. No" << endl;
+                                cin >> next_button;
+                                if (next_button == 1) {
+                                    continue;
+                                }
+                                else {
+                                    throw exception("Go to start screen");
+                                }
 
+                            }
+                            catch (exception& e) {
+                                goto tryAgain;
+                            }
+
+                        }
                     }
-                    if (i == 3) {
-                        cout << "too many error" << endl;
-                        continue;
-                    }
+
                     // Howmuchfee(string pa_ATMBankname, string pa_current_bank_str, string pa_transaction)
 
 
@@ -644,6 +647,11 @@ int main() {
                 }
                 else if (press_button == 5) {
                     //withdrawal 
+
+                    if (Cnt_withdrawal >= 3) {
+                        cout << "The maximum number of withdrawals has been exceeded." << endl;
+                        continue;
+                    }
                     int withdrawal_money;
                     Account* Acc_withdrawal = current_bank->get_Account()[card_index];
                     string ATMBankname1 = start->get_ATMBankname();
@@ -662,41 +670,33 @@ int main() {
                             }
                             if (withdrawal_money < 0)
                                 throw exception("Out of range!");
-                            if (withdrawal_money > Acc_withdrawal->HowMoney())
-                                throw exception("There is no enough money");
-                            break;
-                        }
-                        catch (exception& e) {
-                            cout << e.what() << endl;
-                            continue;
-                        }
-                    }
-                    int i;
-                    for (i = 0; i < 5; i++) {
-                        try {
-                            cout << "Enter your password" << endl;
-                            cin >> password;
-                            if (cin.fail()) {
-                                cin.clear();
-                                cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                            if (withdrawal_money + withdrawl_fee > Acc_withdrawal->HowMoney())
+                                throw exception("There is not enough balance in your account.");
+                            if (withdrawal_money > start->get_ATMmoney()) {
+                                throw exception("There is not enough balance in ATM machine.");
                             }
-                            if (password != Acc_withdrawal->getPassword())
-                                throw password;
                             break;
                         }
                         catch (exception& e) {
-                            cout << e.what() << endl;
-                            continue;
-                        }
-                        catch (int t) {
-                            cout << "Password error : " << i + 1 << "times" << endl;
-                        }
+                            try {
+                                int next_button;
+                                cout << e.what() << endl;
+                                cout << "Are you sure you want to re-enter?" << endl;
+                                cout << "1. Yes    2. No" << endl;
+                                cin >> next_button;
+                                if (next_button == 1) {
+                                    continue;
+                                }
+                                else {
+                                    throw exception("Go to start screen");
+                                }
 
-                    }
-                    if (i == 5) {
-                        cout << "too many error" << endl;
-                        continue;
+                            }
+                            catch (exception& e) {
+                                goto tryAgain;
+                            }
+
+                        }
                     }
                     Cnt_withdrawal += 1;
                     cout << Cnt_withdrawal;
@@ -729,55 +729,59 @@ int main() {
                     Account* Acc_send = current_bank->get_Account()[card_index];
                     int transfer_money;
                     string ATMBankname1 = start->get_ATMBankname();
-                    try {
-                        cout << "Enter the money you want to transfer" << endl;
-                        cin >> transfer_money;
-                        if (cin.fail()) {
-                            cin.clear();
-                            cin.ignore(100, '\n');
-                            throw exception("Value error!");
-                        }
-                        if (transfer_money < 0)
-                            throw exception("Out of range!");
-                        if (transfer_money > Acc_send->HowMoney())
-                            throw exception("There is no enough money");
-                    }
-                    catch (exception& e) {
-                        cout << e.what() << endl;
-                        continue;
-                    }
-                    int i;
-                    for (i = 0; i < 5; i++) {
+                    int transfer_button;
+
+                    int transfer_card;
+                    auto current_tbank = &Bank;
+                    string current_tbank_str = "";
+                    int transfer_fee = 0;
+                    Account* Acc_get = current_bank->get_Account()[card_index];    // 초기화 위해서 
+
+                    while (true) {
                         try {
-                            cout << "Enter your password" << endl;
-                            cin >> password;
+                            cout << "Select cash transfer or account fund transfer." << endl;
+                            cout << "1. Cash transfer      2. Account fund transfer" << endl;
+
+                            cin >> transfer_button;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
                                 throw exception("Value error!");
                             }
-                            if (password != Acc_send->getPassword())
-                                throw password;
-                            break;
-                        }
-                        catch (exception& e) {
-                            cout << e.what() << endl;
-                            continue;
-                        }
-                        catch (int t) {
-                            cout << "Password error : " << i + 1 << "times" << endl;
-                        }
+                            if (transfer_button < 1 || transfer_button>2)
+                                throw exception("Out of range!");
 
-                    }
-                    if (i == 5) {
-                        cout << "too many error" << endl;
-                        continue;
-                    }
-                    int transfer_card;
-                    auto current_tbank = &Bank;
-                    string current_tbank_str = "";
-                    while (true) {
-                        try {
+                            if (transfer_button == 2) {
+                                cout << "Enter the money you want to transfer" << endl;
+                                cin >> transfer_money;
+                                if (cin.fail()) {
+                                    cin.clear();
+                                    cin.ignore(100, '\n');
+                                    throw exception("Value error!");
+                                }
+                                if (transfer_money < 0)
+                                    throw exception("Out of range!");
+                                if (transfer_money > Acc_send->HowMoney())
+                                    throw exception("There is no enough money");
+
+                            }
+
+                            else if (transfer_button == 1) {
+                                cout << "Enter the money you want to transfer" << endl;
+                                cin >> transfer_money;
+                                if (cin.fail()) {
+                                    cin.clear();
+                                    cin.ignore(100, '\n');
+                                    throw exception("Value error!");
+                                }
+                                if (transfer_money < 0)
+                                    throw exception("Out of range!");
+
+                            }
+                            else {
+                                throw exception("Value error!");
+                            }
+
                             cout << "Please enter the card number of the recipient" << endl;
                             cin >> transfer_card;;
                             if (cin.fail()) {
@@ -840,8 +844,6 @@ int main() {
                             else {
                                 throw exception("Value Error!");
                             }
-
-
                         }
 
                         catch (exception& e) {
@@ -862,17 +864,8 @@ int main() {
                             catch (exception& e) {
                                 goto tryAgain;
                             }
-
                         }
-
-
                     }
-                    
-                    
-
-                    
-
-                    
 
                     cout << "Transfer fee is : " << transfer_fee << endl;
                     cout << Acc_send->get_Username() << "'s money : " << Acc_send->HowMoney() << endl;
@@ -888,12 +881,8 @@ int main() {
                     cout << endl;
                 }
             }
-
-
-
         }
     }
-
 
     return 0;
 }
