@@ -836,6 +836,7 @@ int main() {
                                     throw exception("There is no enough money");
                                 }
                                 Acc_get->change_Money(transfer_money - transfer_fee);
+                                start->change_ATMmoney(transfer_money);
                                 start->add_history(Acc_send->get_Username() + " transfer $" + to_string(transfer_money) + " to " + Acc_get->get_Username() + "\n");
                                 break;
 
