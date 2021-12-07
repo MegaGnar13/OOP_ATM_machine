@@ -308,6 +308,9 @@ int main() {
             KakaoBank.addAcclist(accarr[i]);
         }
 
+    int KorEng = 0;     // 한/영 전환 indicator
+                        // 한/영 전환은 ATM 선택 후부터
+
     // 가장 첫 화면
     int ATM_cnt;
     while (true) {
@@ -370,37 +373,70 @@ int main() {
             tryAgain:
                 Sleep(3000);
                 system("cls");//콘솔 화면 초기화
-                cout << "┌-----------------------------------------------------┐" << endl;
-                cout << "│                      " << start->get_ATMBank() << endl;
-                cout << "├-----------------------------------------------------┤" << endl;
-                cout << "│ What do you want to do ? Please press number(ex. 1)" << endl;
-                cout << "│ 0. Stop using (Go back ATM_list display)" << endl;
-                cout << "│ 1. Cancel" << endl;
-                cout << "│ 2. Card insert" << endl;
-                cout << "│ 3. Receipt Print" << endl;
-                cout << "│ 4. Deposit" << endl;
-                cout << "│ 5. Withdrawal" << endl;
-                cout << "│ 6. Transfer" << endl;
-                cout << "├-----------------------------------------------------┤" << endl;
-                cout << "│   ┌------------------┐        ①②③" << endl;
-                cout << "│";
-                if (card_index == -1)  cout << "   │    input card    │        ⑤⑥⑦" << endl;
-                else cout << "   │ =================│        ⑤⑥⑦" << endl;
-                cout << "│   └------------------┘        ⑦⑧⑨" << endl;
-                cout << "└-----------------------------------------------------┘" << endl;
-
+                if (KorEng % 2 == 0) {
+                    cout << "┌-----------------------------------------------------┐" << endl;
+                    cout << "│                      " << start->get_ATMBank() << endl;
+                    cout << "├-----------------------------------------------------┤" << endl;
+                    cout << "│ What do you want to do ? Please press number(ex. 1)" << endl;
+                    cout << "│ 0. Stop using (Go back ATM_list display)" << endl;
+                    cout << "│ 1. Cancel" << endl;
+                    cout << "│ 2. Card insert" << endl;
+                    cout << "│ 3. Receipt Print" << endl;
+                    cout << "│ 4. Deposit" << endl;
+                    cout << "│ 5. Withdrawal" << endl;
+                    cout << "│ 6. Transfer" << endl;
+                    (ATM_cnt % 2 == 1) ? cout << "│ 7. Language Conversion : Korean / English" << endl : cout << "";
+                    // 7 번 추가, 홀수 번호의 ATM 에만 한/영 전환 기능 부여
+                    cout << "├-----------------------------------------------------┤" << endl;
+                    cout << "│   ┌------------------┐        ①②③" << endl;
+                    cout << "│";
+                    if (card_index == -1)  cout << "   │    input card    │        ⑤⑥⑦" << endl;
+                    else cout << "   │ =================│        ⑤⑥⑦" << endl;
+                    cout << "│   └------------------┘        ⑦⑧⑨" << endl;
+                    cout << "└-----------------------------------------------------┘" << endl;
+                }
+                else if (KorEng % 2 == 1) {
+                    cout << "┌-----------------------------------------------------┐" << endl;
+                    cout << "│                      " << start->get_ATMBank() << endl;
+                    cout << "├-----------------------------------------------------┤" << endl;
+                    cout << "│ 어떤 작업을 원하시나요 ? 버튼을 눌러주세요(예시: 1)" << endl;
+                    cout << "│ 0. 사용 중지 (ATM 선택 화면으로 돌아갑니다)" << endl;
+                    cout << "│ 1. 카드 반환" << endl;
+                    cout << "│ 2. 카드 삽입" << endl;
+                    cout << "│ 3. 영수증 출력" << endl;
+                    cout << "│ 4. 입금" << endl;
+                    cout << "│ 5. 출금" << endl;
+                    cout << "│ 6. 송금" << endl;
+                    (ATM_cnt % 2 == 1) ? cout << "│ 7. 언어 변경 : 한국어 / 영어" << endl : cout << "";
+                    // 7 번 추가, 홀수 번호의 ATM 에만 한/영 전환 기능 부여
+                    cout << "├-----------------------------------------------------┤" << endl;
+                    cout << "│   ┌------------------┐        ①②③" << endl;
+                    cout << "│";
+                    if (card_index == -1)  cout << "   │     카드 삽입    │        ⑤⑥⑦" << endl;
+                    else cout << "   │ =================│        ⑤⑥⑦" << endl;
+                    cout << "│   └------------------┘        ⑦⑧⑨" << endl;
+                    cout << "└-----------------------------------------------------┘" << endl;
+                }
                 int press_button;
                 try {
                     cin >> press_button;
                     if (cin.fail()) {
                         cin.clear();
                         cin.ignore(100, '\n');
-                        throw exception("Value error!");
+                        (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                     }
-                    if (press_button < 0 || press_button>6)
-                        throw exception("Out of range!");
-                    if (card_index == -1 && press_button > 2)
-                        throw exception("No card input");
+                    if (ATM_cnt % 2 == 0) {
+                        if (press_button < 0 || press_button>6)
+                            (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("범위 초과!");
+                    }
+                    else if (ATM_cnt % 2 == 1) {
+                        if (press_button < 0 || press_button>7)       // 버튼 수 6 -> 7
+                            (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("범위 초과!");
+                    }
+                    if (press_button != 7) {                          // 카드를 안 넣어도 언어 변환은 할 수 있게
+                        if (card_index == -1 && press_button > 2)
+                            (KorEng % 2 == 0) ? throw exception("No card input") : throw exception("카드를 넣어주세요");
+                    }
                 }
                 catch (exception& e) {
                     cout << e.what() << endl;
@@ -410,75 +446,76 @@ int main() {
                 cout << endl;
 
                 if (press_button == 0) {
-                    cout << "Thank you for using ATM" << endl;
+                    (KorEng % 2 == 0) ? cout << "Thank you for using ATM" << endl : cout << "ATM을 이용해주셔서 감사합니다" << endl;
+                    KorEng = 0;                                    // ATM 선택 시 처음 출력되는 언어는 영어로 고정!
                     break;
                 }
                 else if (press_button == 1) {
                     card_index = -1;
-                    cout << "Please get a card" << endl;
+                    (KorEng % 2 == 0) ? cout << "Please get a card" << endl : cout << "카드를 받아주세요" << endl;
                     continue;
                 }
                 else if (press_button == 2) {                              // 카드 재입력
                     try {
                         if (card_index == -1) {
-                            cout << "Please insert your card(Enter your card number)" << endl;
+                            (KorEng % 2 == 0) ? cout << "Please insert your card(Enter your card number)" << endl : cout << "카드를 삽입해주세요(카드 번호를 입력해주세요)" << endl;
                             cin >> card_num;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
                             if (card_num % 100 == 1) {                        // card valid 검사
                                 if (DaeguBank.find_card(card_num) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 card_index = DaeguBank.find_card(card_num);
                                 current_bank = &DaeguBank;
                                 current_bank_str = "DaeguBank";
                             }
                             else if (card_num % 100 == 11) {
                                 if (SamsungBank.find_card(card_num) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 card_index = SamsungBank.find_card(card_num);
                                 current_bank = &SamsungBank;
                                 current_bank_str = "SamsungBank";
                             }
                             else if (card_num % 100 == 21) {
                                 if (KakaoBank.find_card(card_num) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 card_index = KakaoBank.find_card(card_num);
                                 current_bank = &KakaoBank;
                                 current_bank_str = "KakaoBank";
                             }
                             else
-                                throw exception("This card is not valid");
+                                (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
 
                             if (start->get_ATMSingle() == true) {        // 카드 valid 검사 직후 ATM 싱글/멀티 체크 -> 탈락 시 throw -> continue
                                 if (start->get_ATMBankname() != current_bank_str) {
                                     card_index = -1;
-                                    throw exception("This card is not supported by this ATM machine");
+                                    (KorEng % 2 == 0) ? throw exception("This card is not supported by this ATM machine") : throw exception("이 카드는 해당 ATM에서 사용하실 수 없습니다");
                                 }
                                 else                                     // 지원하는 경우에도 문구 출력
-                                    cout << "This card is useable on this ATM machine" << endl;
+                                    (KorEng % 2 == 0) ? cout << "This card is useable on this ATM machine" << endl : cout << "이 카드는 해당 ATM에서 사용하실 수 있습니다" << endl;
                             }
                             else
-                                cout << "This card is useable on this ATM machine" << endl; // 지원하는 경우에도 문구 출력
+                                (KorEng % 2 == 0) ? cout << "This card is useable on this ATM machine" << endl : cout << "이 카드는 해당 ATM에서 사용하실 수 있습니다" << endl;
 
                             Account* Acc_password = current_bank->get_Account()[card_index];
                             int i;
                             for (i = 0; i < 3; i++) {
                                 try {
-                                    cout << "Enter your password" << endl;
+                                    (KorEng % 2 == 0) ? cout << "Enter your password" << endl : cout << "비밀번호를 입력해주세요" << endl;
                                     cin >> password;
                                     if (cin.fail()) {
                                         cin.clear();
                                         cin.ignore(100, '\n');
-                                        throw exception("Wrong Password");
+                                        (KorEng % 2 == 0) ? throw exception("Wrong Password") : throw exception("비밀번호가 틀렸습니다");
                                     }
                                     if (password != Acc_password->getPassword()) {
-                                        cout << "Wrong Password" << endl;
+                                        (KorEng % 2 == 0) ? cout << "Wrong Password" << endl : cout << "비밀번호가 틀렸습니다" << endl;
                                         throw password;
 
                                     }
@@ -487,25 +524,25 @@ int main() {
                                 }
                                 catch (exception& e) {
                                     cout << e.what() << endl;
-                                    cout << "Password error : " << i + 1 << "times" << endl;
+                                    (KorEng % 2 == 0) ? cout << "Password error : " << i + 1 << "times" << endl : cout << "비밀번호 입력 오류 : " << i + 1 << "회" << endl;
                                     continue;
                                 }
                                 catch (int t) {
-                                    cout << "Password error : " << i + 1 << "times" << endl;
+                                    (KorEng % 2 == 0) ? cout << "Password error : " << i + 1 << "times" << endl : cout << "비밀번호 입력 오류 : " << i + 1 << "회" << endl;
                                 }
 
                             }
                             if (i == 3) {
-                                cout << "too many error" << endl;
-                                cout << "Please get a card" << endl;
+                                (KorEng % 2 == 0) ? cout << "too many error" << endl : cout << "비밀번호를 너무 많이 틀렸습니다" << endl;
+                                (KorEng % 2 == 0) ? cout << "Please get a card" << endl : cout << "카드를 받아주세요" << endl;
                                 card_index = -1;
                                 continue;
                             }
                         }
 
                         else {
-                            cout << "A card is already inserted." << endl;
-                            cout << "If you want to work with another card, press button '1'." << endl;
+                            (KorEng % 2 == 0) ? cout << "A card is already inserted." << endl : cout << "카드가 이미 삽입되어 있습니다" << endl;
+                            (KorEng % 2 == 0) ? cout << "If you want to work with another card, press button '1'." << endl : cout << "다른 카드를 사용하고 싶으시면, 1번 버튼을 눌러주세요" << endl;
                         }
 
                     }
@@ -517,8 +554,8 @@ int main() {
 
 
                 else if (press_button == 3) {
-                    cout << "ATM History:" << endl;
-                    cout << start->get_history() << endl;
+                    (KorEng % 2 == 0) ? cout << "ATM History:" << endl : cout << "ATM 히스토리:" << endl;
+                    cout << start->get_history() << endl;                 // 이거 설마 히스토리도 한국어로 나오게 해야 하나?
                     /*
                     if (card_num % 100 == 1)
                         cout << DaeguATM.get_history() << endl;
@@ -545,51 +582,52 @@ int main() {
                     int deposit_fee = start->Howmuchfee(ATMBankname1, current_bank_str, "Depos");
                     while (true) {
                         try {
-                            cout << "Enter the Enter the number of one_thousand won to deposit: ";
+                            (KorEng % 2 == 0) ? cout << "Enter the Enter the number of one_thousand won to deposit: " : cout << "입금하실 천원 지폐의 개수를 입력해주세요: ";
                             cin >> One_thousand_won;
                             if (cin.fail() || One_thousand_won < 0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
-                            cout << "Enter the Enter the number of five_thousand won to deposit: ";
+                            (KorEng % 2 == 0) ? cout << "Enter the Enter the number of five_thousand won to deposit: " : cout << "입금하실 오천원 지폐의 개수를 입력해주세요: ";
                             cin >> Five_thousand_won;
                             if (cin.fail() || Five_thousand_won < 0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
-                            cout << "Enter the Enter the number of ten_thousand won to deposit: ";
+                            (KorEng % 2 == 0) ? cout << "Enter the Enter the number of ten_thousand won to deposit: " : cout << "입금하실 만원 지폐의 개수를 입력해주세요: ";
                             cin >> Ten_tousand_won;
                             if (cin.fail() || Ten_tousand_won < 0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
-                            cout << "Enter the Enter the number of fifty_thousand won to deposit: ";
+                            (KorEng % 2 == 0) ? cout << "Enter the Enter the number of fifty_thousand won to deposit: " : cout << "입금하실 오만원 지폐의 개수를 입력해주세요: ";
                             cin >> Fifty_thousand_won;
                             if (cin.fail() || Fifty_thousand_won < 0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
-                            cout << "Enter the Enter the number of check to deposit: ";
+                            (KorEng % 2 == 0) ? cout << "Enter the Enter the number of check to deposit: " : cout << "입금하실 수표의 개수를 입력해주세요: ";
                             cin >> check;
                             if (cin.fail() || check < 0) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
 
 
                             int deposit_money = 1000 * One_thousand_won + 5000 * Five_thousand_won + 10000 * Ten_tousand_won + 50000 * Fifty_thousand_won;
 
                             if (deposit_money + 100000 * check < deposit_fee)
-                                throw exception("Deposited money is smaller than the fee.");      // 입금 금액이 수수료보다 작을 시 다시 입금
+                                (KorEng % 2 == 0) ? throw exception("Deposited money is smaller than the fee.") : throw exception("입금된 액수가 수수료보다 작습니다");
+                            // 입금 금액이 수수료보다 작을 시 다시 입금
 
                             int atm_num_of_cash = One_thousand_won + Five_thousand_won + Ten_tousand_won + Fifty_thousand_won;
                             if (atm_num_of_cash > start->get_ATM_num_of_cash() || check > start->get_ATM_num_of_check()) {
-                                throw exception("You have exceeded the amount of money(cash or check) you can deposit.");
+                                (KorEng % 2 == 0) ? throw exception("You have exceeded the amount of money(cash or check) you can deposit.") : throw exception("입금 가능한 현금 혹은 수표의 액수를 초과하셨습니다");
                             }
                             break;
                         }
@@ -597,14 +635,14 @@ int main() {
                             try {
                                 int next_button;
                                 cout << e.what() << endl;
-                                cout << "Are you sure you want to re-enter?" << endl;
-                                cout << "1. Yes    2. No" << endl;
+                                (KorEng % 2 == 0) ? cout << "Are you sure you want to re-enter?" << endl : cout << "정말 종료하시겠습니까?" << endl;
+                                (KorEng % 2 == 0) ? cout << "1. Yes    2. No" << endl : cout << "1. 네    2. 아니오" << endl;
                                 cin >> next_button;
                                 if (next_button == 1) {
                                     continue;
                                 }
                                 else {
-                                    throw exception("Go to start screen");
+                                    (KorEng % 2 == 0) ? throw exception("Go to start screen") : throw exception("초기 화면으로 돌아갑니다");
                                 }
 
                             }
@@ -623,11 +661,13 @@ int main() {
                     Acc_deposit->change_Money(deposit_money - deposit_fee + 100000 * check);
                     start->add_history(Acc_deposit->get_Username() + " deposit $" + to_string(deposit_money) + "\n");
 
-                    cout << "Deposit fee is : " << deposit_fee << endl;
-                    cout << Acc_deposit->get_Username() << "'s money : " << Acc_deposit->HowMoney() << endl;
-                    cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "Deposit fee is : " << deposit_fee << endl : cout << "입금 수수료 : " << deposit_fee << endl;
+                    (KorEng % 2 == 0) ? cout << Acc_deposit->get_Username() << "'s money : " << Acc_deposit->HowMoney() << endl : cout << Acc_deposit->get_Username() << "님의 잔액 : " << Acc_deposit->HowMoney() << endl;
+                    // 영어 변수 1
+                    (KorEng % 2 == 0) ? cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << DaeguATM.get_ATMmoney() << endl;
 
                     // 이하 디버깅 코드는 나중에 지우자
+                    // 어차피 디버깅 코드이므로 한글 변환 X
 
                     cout << "Hong_gil_dong_01 : " << Hong_gil_dong_01.HowMoney() << endl;
                     cout << "Kim_chul_su_01 : " << Kim_chul_su_01.HowMoney() << endl;
@@ -649,7 +689,7 @@ int main() {
                     //withdrawal 
 
                     if (Cnt_withdrawal >= 3) {
-                        cout << "The maximum number of withdrawals has been exceeded." << endl;
+                        (KorEng % 2 == 0) ? cout << "The maximum number of withdrawals has been exceeded." << endl : cout << "출금 가능한 액수를 초과하셨습니다" << endl;
                         continue;
                     }
                     int withdrawal_money;
@@ -658,22 +698,22 @@ int main() {
                     int withdrawl_fee = start->Howmuchfee(ATMBankname1, current_bank_str, "Withd");
                     while (true) {
                         try {
-                            cout << "Enter the money you want to withdrawal" << endl;
+                            (KorEng % 2 == 0) ? cout << "Enter the money you want to withdrawal" << endl : cout << "출금하실 금액을 입력해주세요" << endl;
                             cin >> withdrawal_money;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
                             if (withdrawal_money % 1000 != 0) {
-                                throw exception("Withdrawal is possible only in units of 1,000 won.");
+                                (KorEng % 2 == 0) ? throw exception("Withdrawal is possible only in units of 1,000 won.") : throw exception("출금은 1000원 단위만 가능합니다");
                             }
                             if (withdrawal_money < 0)
-                                throw exception("Out of range!");
+                                (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("범위 초과!");
                             if (withdrawal_money + withdrawl_fee > Acc_withdrawal->HowMoney())
-                                throw exception("There is not enough balance in your account.");
+                                (KorEng % 2 == 0) ? throw exception("There is not enough balance in your account.") : throw exception("잔액이 부족합니다");
                             if (withdrawal_money > start->get_ATMmoney()) {
-                                throw exception("There is not enough balance in ATM machine.");
+                                (KorEng % 2 == 0) ? throw exception("There is not enough balance in ATM machine.") : throw exception("ATM 기기의 현금 잔고가 부족합니다");
                             }
                             break;
                         }
@@ -681,14 +721,14 @@ int main() {
                             try {
                                 int next_button;
                                 cout << e.what() << endl;
-                                cout << "Are you sure you want to re-enter?" << endl;
-                                cout << "1. Yes    2. No" << endl;
+                                (KorEng % 2 == 0) ? cout << "Are you sure you want to re-enter?" << endl : cout << "정말 종료하시겠습니다?" << endl;
+                                (KorEng % 2 == 0) ? cout << "1. Yes    2. No" << endl : cout << "1. 네    2. 아니오" << endl;
                                 cin >> next_button;
                                 if (next_button == 1) {
                                     continue;
                                 }
                                 else {
-                                    throw exception("Go to start screen");
+                                    (KorEng % 2 == 0) ? throw exception("Go to start screen") : throw exception("초기 화면으로 돌아갑니다");
                                 }
 
                             }
@@ -704,9 +744,9 @@ int main() {
                     Acc_withdrawal->change_Money(-withdrawal_money - withdrawl_fee);
                     start->add_history(Acc_withdrawal->get_Username() + " withdrawal $" + to_string(withdrawal_money) + "\n");
 
-                    cout << "Withdrawl fee is : " << withdrawl_fee << endl;
-                    cout << Acc_withdrawal->get_Username() << "'s money : " << Acc_withdrawal->HowMoney() << endl;
-                    cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "Withdrawl fee is : " << withdrawl_fee << endl : cout << "출금 수수료 : " << withdrawl_fee << endl;
+                    (KorEng % 2 == 0) ? cout << Acc_withdrawal->get_Username() << "'s money : " << Acc_withdrawal->HowMoney() << endl : cout << Acc_withdrawal->get_Username() << "님의 잔액 : " << Acc_withdrawal->HowMoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << DaeguATM.get_ATMmoney() << endl;
 
                     cout << "Hong_gil_dong_01 : " << Hong_gil_dong_01.HowMoney() << endl;
                     cout << "Kim_chul_su_01 : " << Kim_chul_su_01.HowMoney() << endl;
@@ -739,90 +779,90 @@ int main() {
 
                     while (true) {
                         try {
-                            cout << "Select cash transfer or account fund transfer." << endl;
-                            cout << "1. Cash transfer      2. Account fund transfer" << endl;
+                            (KorEng % 2 == 0) ? cout << "Select cash transfer or account fund transfer." << endl : cout << "현금 송금을 하실지, 계좌 송금을 하실지 선택해주세요" << endl;
+                            (KorEng % 2 == 0) ? cout << "1. Cash transfer      2. Account fund transfer" << endl : cout << "1. 현금 송금      2. 계좌 송금" << endl;
 
                             cin >> transfer_button;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
                             if (transfer_button < 1 || transfer_button>2)
-                                throw exception("Out of range!");
+                                (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("범위 초과!");
 
                             if (transfer_button == 2) {
-                                cout << "Enter the money you want to transfer" << endl;
+                                (KorEng % 2 == 0) ? cout << "Enter the money you want to transfer" << endl : cout << "송금하실 금액을 입력해주세요" << endl;
                                 cin >> transfer_money;
                                 if (cin.fail()) {
                                     cin.clear();
                                     cin.ignore(100, '\n');
-                                    throw exception("Value error!");
+                                    (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                                 }
                                 if (transfer_money < 0)
-                                    throw exception("Out of range!");
+                                    (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("입력 오류!");
                                 if (transfer_money > Acc_send->HowMoney())
-                                    throw exception("There is no enough money");
+                                    (KorEng % 2 == 0) ? throw exception("There is no enough money") : throw exception("계좌의 잔액이 부족합니다");
 
                             }
 
                             else if (transfer_button == 1) {
-                                cout << "Enter the money you want to transfer" << endl;
+                                (KorEng % 2 == 0) ? cout << "Enter the money you want to transfer" << endl : cout << "송금하실 금액을 입력해주세요" << endl;
                                 cin >> transfer_money;
                                 if (cin.fail()) {
                                     cin.clear();
                                     cin.ignore(100, '\n');
-                                    throw exception("Value error!");
+                                    (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                                 }
                                 if (transfer_money < 0)
-                                    throw exception("Out of range!");
+                                    (KorEng % 2 == 0) ? throw exception("Out of range!") : throw exception("범위 초과!");
 
                             }
                             else {
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
 
-                            cout << "Please enter the card number of the recipient" << endl;
+                            (KorEng % 2 == 0) ? cout << "Please enter the card number of the recipient" << endl : cout << "받으실 분의 카드 번호를 입력해주세요" << endl;
                             cin >> transfer_card;;
                             if (cin.fail()) {
                                 cin.clear();
                                 cin.ignore(100, '\n');
-                                throw exception("Value error!");
+                                (KorEng % 2 == 0) ? throw exception("Value error!") : throw exception("입력 오류!");
                             }
                             if (card_num == transfer_card)
-                                throw exception("This is same card");
+                                (KorEng % 2 == 0) ? throw exception("This is same card") : throw exception("같은 카드입니다");
                             if (transfer_card % 100 == 1) {                        // card valid 검사
                                 if (DaeguBank.find_card(transfer_card) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 current_tbank = &DaeguBank;
                                 current_tbank_str = "DaeguBank";
 
                             }
                             else if (transfer_card % 100 == 11) {
                                 if (SamsungBank.find_card(transfer_card) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 current_tbank = &SamsungBank;
                                 current_tbank_str = "SamsungBank";
 
                             }
                             else if (transfer_card % 100 == 21) {
                                 if (KakaoBank.find_card(transfer_card) == -1)
-                                    throw exception("This card is not valid");
-                                cout << "Card is valid" << endl;
+                                    (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
+                                (KorEng % 2 == 0) ? cout << "Card is valid" << endl : cout << "유효한 카드입니다" << endl;
                                 current_tbank = &KakaoBank;
                                 current_tbank_str = "KakaoBank";
 
                             }
                             else
-                                throw exception("This card is not valid");
+                                (KorEng % 2 == 0) ? throw exception("This card is not valid") : throw exception("유효하지 않은 카드입니다");
 
                             if (transfer_button == 2) {
                                 transfer_fee = start->Howmuchfee(ATMBankname1, current_bank_str, current_tbank_str, "Trans");
                                 Acc_get = current_tbank->get_Account()[current_tbank->find_card(transfer_card)];
                                 if (Acc_send->HowMoney() < transfer_money + transfer_fee) {
-                                    throw exception("There is no enough money");
+                                    (KorEng % 2 == 0) ? throw exception("There is no enough money") : throw exception("계좌의 잔액이 부족합니다");
                                 }
                                 Acc_send->change_Money(-transfer_money - transfer_fee);
                                 Acc_get->change_Money(transfer_money);
@@ -833,7 +873,7 @@ int main() {
                                 transfer_fee = start->Howmuchfee(ATMBankname1, current_tbank_str, "Trans");
                                 Acc_get = current_tbank->get_Account()[current_tbank->find_card(transfer_card)];
                                 if (transfer_money < transfer_fee) {
-                                    throw exception("There is no enough money");
+                                    (KorEng % 2 == 0) ? throw exception("There is no enough money") : throw exception("입력하신 금액이 수수료보다 작습니다");
                                 }
                                 Acc_get->change_Money(transfer_money - transfer_fee);
                                 start->change_ATMmoney(transfer_money);
@@ -843,7 +883,7 @@ int main() {
                             }
 
                             else {
-                                throw exception("Value Error!");
+                                (KorEng % 2 == 0) ? throw exception("Value Error!") : throw exception("입력 오류!");
                             }
                         }
 
@@ -851,14 +891,14 @@ int main() {
                             try {
                                 int next_button;
                                 cout << e.what() << endl;
-                                cout << "Are you sure you want to re-enter?" << endl;
-                                cout << "1. Yes    2. No" << endl;
+                                (KorEng % 2 == 0) ? cout << "Are you sure you want to re-enter?" << endl : cout << "정말 종료하시겠습니까?" << endl;
+                                (KorEng % 2 == 0) ? cout << "1. Yes    2. No" << endl : cout << "1. 네    2. 아니오" << endl;
                                 cin >> next_button;
                                 if (next_button == 1) {
                                     continue;
                                 }
                                 else {
-                                    throw exception("Go to start screen");
+                                    (KorEng % 2 == 0) ? throw exception("Go to start screen") : throw exception("초기 화면으로 돌아갑니다");
                                 }
 
                             }
@@ -868,9 +908,9 @@ int main() {
                         }
                     }
 
-                    cout << "Transfer fee is : " << transfer_fee << endl;
-                    cout << Acc_send->get_Username() << "'s money : " << Acc_send->HowMoney() << endl;
-                    cout << Acc_get->get_Username() << "'s money : " << Acc_get->HowMoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "Transfer fee is : " << transfer_fee << endl : cout << "송금 수수료 : " << transfer_fee << endl;
+                    (KorEng % 2 == 0) ? cout << Acc_send->get_Username() << "'s money : " << Acc_send->HowMoney() << endl : cout << Acc_send->get_Username() << "님의 잔액 : " << Acc_send->HowMoney() << endl;
+                    (KorEng % 2 == 0) ? cout << Acc_get->get_Username() << "'s money : " << Acc_get->HowMoney() << endl : cout << Acc_get->get_Username() << "님의 잔액 : " << Acc_get->HowMoney() << endl;
 
                     cout << "Hong_gil_dong_01 : " << Hong_gil_dong_01.HowMoney() << endl;
                     cout << "Kim_chul_su_01 : " << Kim_chul_su_01.HowMoney() << endl;
@@ -880,6 +920,9 @@ int main() {
                     cout << "Hong_gil_dong_02 : " << Hong_gil_dong_02.HowMoney() << endl;
 
                     cout << endl;
+                }
+                else if (press_button == 7) {
+                    KorEng++;
                 }
             }
         }
