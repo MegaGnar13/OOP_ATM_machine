@@ -316,6 +316,7 @@ int main() {
         }
         catch (exception& e) {
             cout << e.what() << endl;
+            continue;
         }
 
         if (ATM_cnt == 0) {
@@ -628,22 +629,39 @@ int main() {
                     Acc_deposit->change_Money(deposit_money - deposit_fee + 100000 * check);
                     string k;
                     (KorEng % 2 == 0) ? k = " deposit $" : k = " 입금 $";
-                    user_history += Acc_deposit->get_Username() + k + to_string(deposit_money) + "\n";
-                    cout << endl << Acc_deposit->get_Username() + k + to_string(deposit_money) + "\n";
+                    user_history += Acc_deposit->get_Username() + k + to_string(deposit_money - deposit_fee + 100000 * check) + "\n";
+                    cout << endl << Acc_deposit->get_Username() + k + to_string(deposit_money - deposit_fee + 100000 * check) + "\n";
                     start->add_history("ID: " + to_string(history_id) + " Card number: " + to_string(card_num) + " History: " + Acc_deposit->get_Username() + " deposit $" + to_string(deposit_money) + "\n");
                     history_id++;
 
                     (KorEng % 2 == 0) ? cout << "Deposit fee is : " << deposit_fee << endl : cout << "입금 수수료 : " << deposit_fee << endl;
                     (KorEng % 2 == 0) ? cout << Acc_deposit->get_Username() << "'s money : " << Acc_deposit->HowMoney() << endl : cout << Acc_deposit->get_Username() << "님의 잔액 : " << Acc_deposit->HowMoney() << endl;
                     // 영어 변수 1
-                    (KorEng % 2 == 0) ? cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << DaeguATM.get_ATMmoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "ATM money : " << start->get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << start->get_ATMmoney() << endl;
 
                     cout << endl;
                 }
                 else if (press_button == 5) {
-                    if (Cnt_withdrawal >= 3) {
-                        (KorEng % 2 == 0) ? cout << "The maximum number of withdrawals has been exceeded." << endl : cout << "출금 가능한 횟수를 초과하셨습니다" << endl;
-                        continue;
+                    try {
+                        if (Cnt_withdrawal >= 3) {
+                            (KorEng % 2 == 0) ? throw exception("The maximum number of withdrawals has been exceeded.") : throw exception("출금 가능한 횟수를 초과하셨습니다");
+                        }
+                    }
+                    catch (exception& e) {
+                        try {
+                            int next_button;
+                            cout << e.what() << endl;
+                            (KorEng % 2 == 0) ? cout << "Are you sure you want to re-enter?" << endl : cout << "정말 종료하시겠습니다?" << endl;
+                            (KorEng % 2 == 0) ? cout << "1. Yes    2. No" << endl : cout << "1. 네    2. 아니오" << endl;
+                            cin >> next_button;
+                            if (next_button == 1)
+                                continue;
+                            else
+                                (KorEng % 2 == 0) ? throw exception("Go to start screen") : throw exception("초기 화면으로 돌아갑니다");
+                        }
+                        catch (exception& e) {
+                            goto tryAgain;
+                        }
                     }
                     int withdrawal_money;
                     Account* Acc_withdrawal = current_bank->get_Account()[card_index];
@@ -698,7 +716,7 @@ int main() {
                     cout << endl << Acc_withdrawal->get_Username() + k + to_string(withdrawal_money) + "\n";
                     (KorEng % 2 == 0) ? cout << "Withdrawl fee is : " << withdrawl_fee << endl : cout << "출금 수수료 : " << withdrawl_fee << endl;
                     (KorEng % 2 == 0) ? cout << Acc_withdrawal->get_Username() << "'s money : " << Acc_withdrawal->HowMoney() << endl : cout << Acc_withdrawal->get_Username() << "님의 잔액 : " << Acc_withdrawal->HowMoney() << endl;
-                    (KorEng % 2 == 0) ? cout << "ATM money : " << DaeguATM.get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << DaeguATM.get_ATMmoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "ATM money : " << start->get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << start->get_ATMmoney() << endl;
 
                     cout << endl;
                 }
@@ -838,6 +856,7 @@ int main() {
                     (KorEng % 2 == 0) ? cout << "Transfer fee is : " << transfer_fee << endl : cout << "송금 수수료 : " << transfer_fee << endl;
                     (KorEng % 2 == 0) ? cout << Acc_send->get_Username() << "'s money : " << Acc_send->HowMoney() << endl : cout << Acc_send->get_Username() << "님의 잔액 : " << Acc_send->HowMoney() << endl;
                     (KorEng % 2 == 0) ? cout << Acc_get->get_Username() << "'s money : " << Acc_get->HowMoney() << endl : cout << Acc_get->get_Username() << "님의 잔액 : " << Acc_get->HowMoney() << endl;
+                    (KorEng % 2 == 0) ? cout << "ATM money : " << start->get_ATMmoney() << endl : cout << "ATM 기기에 남은 현금 : " << start->get_ATMmoney() << endl;
                     cout << endl;
                 }
                 else if (press_button == 7) {
