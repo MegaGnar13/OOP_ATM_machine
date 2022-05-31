@@ -1,4 +1,4 @@
-# OOP_ATM_machine
+# OOP-ATMmachine
 
 ![image](https://user-images.githubusercontent.com/87847087/158598792-8083e2f4-5b01-48ee-8dd2-9656be672987.png)
 
