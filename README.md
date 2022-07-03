@@ -16,3 +16,6 @@
 
 ![image](https://user-images.githubusercontent.com/87847087/158600384-d75bd80b-4097-4a3b-9405-684a07138903.png)
 
+## My role
+- Implementation of ATM deposit, withdrawal, and transfer functions
+- Exception handling
